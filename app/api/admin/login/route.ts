@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../lib";
 import { SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { SHA256 as sha256 } from "crypto-js";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET as string);
 
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
-        const user = await prisma.admin.findUnique({ where : { email, password } });
+        const user = await prisma.admin.findUnique({ where : { email, password : sha256(password).toString() } });
         if(!user) {
             return NextResponse.json(
                 { message: 'Invalid email or password.' },

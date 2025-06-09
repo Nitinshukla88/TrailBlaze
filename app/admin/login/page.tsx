@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import { Architects_Daughter } from 'next/font/google';
 import { apiClient } from '@/app/lib';
 import { ADMOIN_API_ROUTES } from '@/app/utils';
+import { useAppStore } from '@/app/store';
+import { useRouter } from 'next/navigation';
 
 const ArchitectsDaughter = Architects_Daughter({
   weight: '400',
@@ -13,12 +15,15 @@ const ArchitectsDaughter = Architects_Daughter({
   subsets: ['latin'],
 })
 
-const LoginPage = () => {
+const LoginPage = () => { 
+  const router = useRouter()
+  const {setUserInfo} = useAppStore();
   const handleLogin = async () => {
     try {
       const response = await apiClient.post(ADMOIN_API_ROUTES.LOGIN, {email, password});
       if(response.data.userInfo) {
-      
+        setUserInfo(response.data.userInfo);
+        router.push('/admin');
       }
     } catch (error) {
       console.error("Login failed:", error);

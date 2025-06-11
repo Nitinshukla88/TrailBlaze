@@ -65,7 +65,11 @@ const Sidebar = () => {
                     button: ({ active }: { active: boolean }) => {
                         return {
                             backgroundColor: active ? "#0E1428" : "#ffffff",
-                            color: active ? "#ffffff" : "#000000"
+                            color: active ? "#ffffff" : "#000000",
+                            "&:hover" : {
+                                backgroundColor: active ? "#0E1428" : "#0E1428",
+                                color: active ? "#ffffff" : "#ffffff",
+                            }
                         }
                     }
                 }}

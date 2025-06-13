@@ -1,4 +1,7 @@
 "use client";
+import { ScrapingQueue } from "@/app/components/admin/sidebar/scraping-queue";
+import { apiClient } from "@/app/lib";
+import { ADMOIN_API_ROUTES } from "@/app/utils";
 import {
   Button,
   Card,
@@ -26,6 +29,13 @@ const ScrapeData = () => {
     setCities(parsed?.map((city: { name: string }) => city.name) ?? []);
     console.log(response);
   };
+
+  const startScraping = async () => {
+    await apiClient.post(ADMOIN_API_ROUTES.CREATE_JOB, {
+      url : `https://packages.yatra.com/holidays/intl/search.htm?destination=${selectedCity}`,
+      jobType : { type : "location" },
+    })
+  }
   return (
     <section className="m-10 grid grid-cols-3 gap-5">
       <Card className="col-span-2">
@@ -59,11 +69,12 @@ const ScrapeData = () => {
               <h1 className="text-xl">Scrape data for {selectedCity}</h1>
             )}
           </div>
-          <Button size="lg" className="w-full" color="primary">
+          <Button size="lg" className="w-full" color="primary" onClick={startScraping}>
             Scrape
           </Button>
         </CardFooter>
       </Card>
+      <ScrapingQueue/>
     </section>
   );
 };

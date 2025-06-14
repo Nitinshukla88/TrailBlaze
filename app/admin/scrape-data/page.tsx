@@ -15,12 +15,14 @@ import {
 } from "@heroui/react";
 import axios from "axios";
 import React, { useState } from "react";
+import { CurrentlyScrapingTable } from "./components";
 
 const ScrapeData = () => {
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState<undefined | string>(
     undefined
   );
+  const [jobs, setJobs] = useState([])
   const searchCities = async (searchString: string) => {
     const response = await axios.get(
       `https://secure.geonames.org/searchJSON?q=${searchString}&maxRows=5&username=nitin990&style=SHORT`
@@ -75,6 +77,9 @@ const ScrapeData = () => {
         </CardFooter>
       </Card>
       <ScrapingQueue/>
+      <div className="col-span-3">
+        <CurrentlyScrapingTable jobs={jobs} />
+      </div>
     </section>
   );
 };

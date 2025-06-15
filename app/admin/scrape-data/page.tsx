@@ -14,7 +14,7 @@ import {
   Tabs,
 } from "@heroui/react";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CurrentlyScrapingTable } from "./components";
 
 const ScrapeData = () => {
@@ -38,6 +38,19 @@ const ScrapeData = () => {
       jobType : { type : "location" },
     })
   }
+
+useEffect(()=> {
+    const getData = async () => {
+      const data = await apiClient.get(ADMOIN_API_ROUTES.JOB_DETAILS);
+      setJobs(data?.data?.jobs ?? 0);
+    }
+    const interval = setInterval(()=> getData(), 3000);
+
+    return () => {
+      clearInterval(interval);
+    }
+  }, []);
+
   return (
     <section className="m-10 grid grid-cols-3 gap-5">
       <Card className="col-span-2">

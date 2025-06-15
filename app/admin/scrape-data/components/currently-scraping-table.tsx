@@ -19,6 +19,7 @@ import {
   ChipProps,
   SortDescriptor,
 } from "@heroui/react";
+import {FaChevronDown, FaSearch} from "react-icons/fa";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -349,21 +350,20 @@ export const users = [
 ];
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
-  active: "success",
-  paused: "danger",
-  vacation: "warning",
+  active: "primary",
+  failed: "danger",
+  completed: "success",
 };
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
+const columns = [
+  {name : "ID", uid : "id"}
+]
 
 type User = (typeof users)[0];
 
-export default function CurrentlyScrapingTable() {
+export default function CurrentlyScrapingTable({jobs}) {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
-  const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
-    new Set(INITIAL_VISIBLE_COLUMNS),
-  );
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({

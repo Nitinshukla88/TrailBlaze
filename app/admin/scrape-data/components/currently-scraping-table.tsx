@@ -12,8 +12,6 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownItem,
-  Chip,
-  User,
   Pagination,
   Selection,
   ChipProps,
@@ -142,8 +140,8 @@ export const columns = [
 
 export const statusOptions = [
   {name: "Active", uid: "active"},
-  {name: "Paused", uid: "paused"},
-  {name: "Vacation", uid: "vacation"},
+  {name: "Failed", uid: "failed"},
+  {name: "Complete", uid: "complete"},
 ];
 
 export const users = [
@@ -355,13 +353,25 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
   completed: "success",
 };
 
-const columns = [
-  {name : "ID", uid : "id"}
-]
+const jobColumns = [
+  {name : "ID", uid : "id"},
+  {name : "URL", uid : "url"},
+  {name : "CREATED AT", uid : "createdAt"},
+  {name : "JOB TYPE", uid : "jobType"},
+  {name : "STATUS", uid : "status"},
+];
+
+interface JobType {
+  id : string,
+  url : string,
+  createdAt : string,
+  jobType : any;
+  status : "active" | "failed" | "completed";
+}
 
 type User = (typeof users)[0];
 
-export default function CurrentlyScrapingTable({jobs}) {
+export default function CurrentlyScrapingTable({jobs} : {jobs: JobType[]}) {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
@@ -375,18 +385,14 @@ export default function CurrentlyScrapingTable({jobs}) {
 
   const hasSearchFilter = Boolean(filterValue);
 
-  const headerColumns = React.useMemo(() => {
-    if (visibleColumns === "all") return columns;
-
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
-  }, [visibleColumns]);
+  const headerColumns = jobColumns;
 
   const filteredItems = React.useMemo(() => {
-    let filteredUsers = [...users];
+    let filteredUsers = jobs;
 
     if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((user) =>
-        user.name.toLowerCase().includes(filterValue.toLowerCase()),
+      filteredUsers = filteredUsers.filter((job) =>
+        job.url.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
     if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
@@ -396,7 +402,7 @@ export default function CurrentlyScrapingTable({jobs}) {
     }
 
     return filteredUsers;
-  }, [users, filterValue, statusFilter]);
+  }, [jobs, filterValue, statusFilter, hasSearchFilter]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage) || 1;
 
@@ -407,63 +413,18 @@ export default function CurrentlyScrapingTable({jobs}) {
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
-  const sortedItems = React.useMemo(() => {
-    return [...items].sort((a: User, b: User) => {
-      const first = a[sortDescriptor.column as keyof User] as number;
-      const second = b[sortDescriptor.column as keyof User] as number;
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
-    });
-  }, [sortDescriptor, items]);
-
-  const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
-    const cellValue = user[columnKey as keyof User];
+  const renderCell = React.useCallback((job: JobType, columnKey: React.Key) => {
+    const cellValue = job[columnKey as keyof JobType];
 
     switch (columnKey) {
-      case "name":
-        return (
-          <User
-            avatarProps={{radius: "lg", src: user.avatar}}
-            description={user.email}
-            name={cellValue}
-          >
-            {user.email}
-          </User>
-        );
-      case "role":
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            <p className="text-bold text-tiny capitalize text-default-400">{user.team}</p>
-          </div>
-        );
-      case "status":
-        return (
-          <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
-            {cellValue}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
-                  <VerticalDotsIcon className="text-default-300" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem key="view">View</DropdownItem>
-                <DropdownItem key="edit">Edit</DropdownItem>
-                <DropdownItem key="delete">Delete</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
-      default:
-        return cellValue;
-    }
+    case "jobType":
+      if (typeof cellValue === "object" && cellValue !== null) {
+        return cellValue.type || cellValue.name || JSON.stringify(cellValue);
+      }
+      return cellValue;
+    default:
+      return cellValue;
+  }
   }, []);
 
   const onNextPage = React.useCallback(() => {
@@ -505,7 +466,7 @@ export default function CurrentlyScrapingTable({jobs}) {
             isClearable
             className="w-full sm:max-w-[44%]"
             placeholder="Search by name..."
-            startContent={<SearchIcon />}
+            startContent={<FaSearch />}
             value={filterValue}
             onClear={() => onClear()}
             onValueChange={onSearchChange}
@@ -513,7 +474,7 @@ export default function CurrentlyScrapingTable({jobs}) {
           <div className="flex gap-3">
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                <Button endContent={<FaChevronDown className="text-small" />} variant="flat">
                   Status
                 </Button>
               </DropdownTrigger>
@@ -527,39 +488,15 @@ export default function CurrentlyScrapingTable({jobs}) {
               >
                 {statusOptions.map((status) => (
                   <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
+                    {status.name}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                  Columns
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Button color="primary" endContent={<PlusIcon />}>
-              Add New
-            </Button>
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">Total {users.length} users</span>
+          <span className="text-default-400 text-small">Total {jobs.length} jobs</span>
           <label className="flex items-center text-default-400 text-small">
             Rows per page:
             <select
@@ -577,11 +514,10 @@ export default function CurrentlyScrapingTable({jobs}) {
   }, [
     filterValue,
     statusFilter,
-    visibleColumns,
     onSearchChange,
     onRowsPerPageChange,
-    users.length,
-    hasSearchFilter,
+    jobs.length,
+    onClear
   ]);
 
   const bottomContent = React.useMemo(() => {
@@ -611,7 +547,7 @@ export default function CurrentlyScrapingTable({jobs}) {
         </div>
       </div>
     );
-  }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+  }, [selectedKeys, filteredItems.length, page, pages, onPreviousPage, onNextPage]);
 
   return (
     <Table
@@ -635,13 +571,12 @@ export default function CurrentlyScrapingTable({jobs}) {
           <TableColumn
             key={column.uid}
             align={column.uid === "actions" ? "center" : "start"}
-            allowsSorting={column.sortable}
           >
             {column.name}
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={"No users found"} items={sortedItems}>
+      <TableBody emptyContent={"No users found"} items={items}>
         {(item) => (
           <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

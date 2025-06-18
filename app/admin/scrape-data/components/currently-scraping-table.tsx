@@ -16,8 +16,10 @@ import {
   Selection,
   ChipProps,
   SortDescriptor,
+  Chip,
 } from "@heroui/react";
 import {FaChevronDown, FaSearch} from "react-icons/fa";
+import Link from "next/link";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -413,15 +415,37 @@ export default function CurrentlyScrapingTable({jobs} : {jobs: JobType[]}) {
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
+  const formatDateTime = (intputDate : string) => {
+    const date = new Date(intputDate);
+    const options = {
+      weekday : "long",
+      month : "long",
+      day : "numeric",
+      minute : "numeric",
+      second : "numeric",
+      timeZoneName : "short",
+    } as Intl.DateTimeFormatOptions;
+
+    const formattedDate = new Intl.DateTimeFormat("en-Us", options).format(date);
+    return formattedDate;
+  }
+
   const renderCell = React.useCallback((job: JobType, columnKey: React.Key) => {
     const cellValue = job[columnKey as keyof JobType];
 
     switch (columnKey) {
+    case "url":
+      return <Link href={cellValue} target="_blank" className="text-primary-500">
+        {cellValue}
+      </Link>;
+    case "createdAt":
+      return formatDateTime(cellValue);
+    case "status":
+      return <Chip className="capitalize" color={statusColorMap[job.status]} size="sm" variant="flat">
+        {cellValue}
+      </Chip>;
     case "jobType":
-      if (typeof cellValue === "object" && cellValue !== null) {
-        return cellValue.type || cellValue.name || JSON.stringify(cellValue);
-      }
-      return cellValue;
+      return cellValue.type;
     default:
       return cellValue;
   }
@@ -576,7 +600,7 @@ export default function CurrentlyScrapingTable({jobs} : {jobs: JobType[]}) {
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={"No users found"} items={items}>
+      <TableBody emptyContent={"No Jobs found"} items={items}>
         {(item) => (
           <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

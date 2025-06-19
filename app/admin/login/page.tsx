@@ -1,11 +1,11 @@
 'use client';
-import { Button, Card, CardBody, CardFooter, CardHeader, Input } from '@heroui/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Input } from '@heroui/react'
 import Image from 'next/image';
 import React, { useState } from 'react';
 
 import { Architects_Daughter } from 'next/font/google';
-import { apiClient } from '@/app/lib';
-import { ADMOIN_API_ROUTES } from '@/app/utils';
+import axios from 'axios';
+import { ADMIN_API_ROUTES } from '@/app/utils';
 import { useAppStore } from '@/app/store';
 import { useRouter } from 'next/navigation';
 
@@ -20,7 +20,7 @@ const LoginPage = () => {
   const {setUserInfo} = useAppStore();
   const handleLogin = async () => {
     try {
-      const response = await apiClient.post(ADMOIN_API_ROUTES.LOGIN, {email, password});
+      const response = await axios.post(ADMIN_API_ROUTES.LOGIN, {email, password});
       if(response.data.userInfo) {
         setUserInfo(response.data.userInfo);
         router.push('/admin');

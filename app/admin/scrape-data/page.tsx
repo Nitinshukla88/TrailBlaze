@@ -1,7 +1,7 @@
 "use client";
 import { ScrapingQueue } from "@/app/components/admin/sidebar/scraping-queue";
 import { apiClient } from "@/app/lib";
-import { ADMOIN_API_ROUTES } from "@/app/utils";
+import { ADMIN_API_ROUTES } from "@/app/utils";
 import {
   Button,
   Card,
@@ -33,7 +33,7 @@ const ScrapeData = () => {
   };
 
   const startScraping = async () => {
-    await apiClient.post(ADMOIN_API_ROUTES.CREATE_JOB, {
+    await axios.post(ADMIN_API_ROUTES.CREATE_JOB, {
       url : `https://packages.yatra.com/holidays/intl/search.htm?destination=${selectedCity}`,
       jobType : { type : "location" },
     })
@@ -41,7 +41,7 @@ const ScrapeData = () => {
 
 useEffect(()=> {
     const getData = async () => {
-      const data = await apiClient.get(ADMOIN_API_ROUTES.JOB_DETAILS);
+      const data = await axios.get(ADMIN_API_ROUTES.JOB_DETAILS);
       setJobs(data?.data?.jobs ?? 0);
     }
     const interval = setInterval(()=> getData(), 3000);

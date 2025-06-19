@@ -1,3 +1,3 @@
-import { ADMOIN_API_ROUTES } from "./api-routes";
+import { ADMIN_API_ROUTES } from "./api-routes";
 
-export { ADMOIN_API_ROUTES };
+export { ADMIN_API_ROUTES };

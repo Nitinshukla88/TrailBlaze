@@ -1,3 +1,12 @@
 export const register = async () => {
-    console.log("Server Started");
+    if(process.env.NEXT_RUNTIME === "nodejs") {
+        const { Worker } = await import("bullmq");
+        const { connection, jobsQueue } = await import("./app/lib/index");
+
+        new Worker("jobsQueue", async (job) => {
+            console.log({ job });
+        }, {
+            connection, concurrency:10,removeOnComplete:{count : 1000},removeOnFail:{count : 5000}
+        })
+    }
 }

@@ -12,9 +12,10 @@ export const register = async () => {
             try {
                 browser = await puppeteer.connect({ browserWSEndpoint: BROWSER_WS });
                 const page = await browser.newPage();
+                console.log("before if", job.data)
                 if(job.data.jobType.type === "location") {
                     console.log("Connected ! Navigating to " + job.data.url);
-                    await page.goto(job.data.url);
+                    await page.goto(job.data.url, { timeout : 10000 });
                     console.log("Navigated! Scraping page content...");
                     const packages = await startLocationScraping(page);
                     console.log({packages})

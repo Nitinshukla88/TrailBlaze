@@ -1,6 +1,5 @@
 "use client";
 import { ScrapingQueue } from "@/app/components/admin/sidebar/scraping-queue";
-import { apiClient } from "@/app/lib";
 import { ADMIN_API_ROUTES } from "@/app/utils";
 import {
   Button,
@@ -44,10 +43,11 @@ useEffect(()=> {
       const data = await axios.get(ADMIN_API_ROUTES.JOB_DETAILS);
       setJobs(data?.data?.jobs ?? 0);
     }
-    const interval = setInterval(()=> getData(), 3000);
+    // const interval = setInterval(()=> getData(), 3000);
+    getData();
 
     return () => {
-      clearInterval(interval);
+      // clearInterval(interval);
     }
   }, []);
 

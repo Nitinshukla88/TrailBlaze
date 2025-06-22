@@ -15,6 +15,7 @@ export const startLocationScraping = async (page : Page) : Promise<PackageInfo[]
                 name : ""
             };
             packageInfo.name = (packageElement.querySelector(".package-name a") as HTMLElement).textContent || "";
+            packages.push(packageInfo);
         });
         return packages;
     })
